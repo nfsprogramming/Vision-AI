@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col gap-lg h-full">
+    <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-primary text-[32px]">bar_chart</span>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">Analytics Dashboard</h1>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter h-full">
+        <!-- Overview Cards -->
+        <div class="flex flex-col gap-sm">
+            <div class="glass-card p-lg rounded-xl flex flex-col gap-sm">
+                <span class="font-label-caps text-label-caps text-on-surface-variant">TODAY'S ATTENDANCE</span>
+                <span id="statToday" class="font-headline-lg text-[64px] font-bold text-secondary">0</span>
+            </div>
+            <div class="glass-card p-lg rounded-xl flex flex-col gap-sm">
+                <span class="font-label-caps text-label-caps text-on-surface-variant">TOTAL RECORDS</span>
+                <span id="statTotal" class="font-headline-lg text-[48px] font-bold text-primary">0</span>
+            </div>
+        </div>
+
+        <!-- Chart Container -->
+        <div class="glass-card p-lg rounded-xl flex flex-col h-full">
+            <span class="font-label-caps text-label-caps text-on-surface-variant mb-md">LAST 7 DAYS</span>
+            <div class="flex-1 relative w-full h-full min-h-[300px]">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function loadAnalytics() {
+        try {
+            const res = await fetch('/api/analytics');
+            const data = await res.json();
+            
+            document.getElementById('statToday').innerText = data.total_today || 0;
+            document.getElementById('statTotal').innerText = data.total_all || 0;
+
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Attendance Count',
+                        data: data.data,
+                        backgroundColor: '#8981ff',
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, color: '#918fa0' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#918fa0' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error("Failed to load analytics", e);
+        }
+    }
+    loadAnalytics();
+</script>
+{% endblock %}

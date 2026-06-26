@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>VisionAI - Command Center</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Geist:wght@400;600;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#8981ff",
+                        "on-tertiary-fixed": "#40000f",
+                        "on-secondary-container": "#00566b",
+                        "outline": "#918fa0",
+                        "primary": "#c5c0ff",
+                        "surface-variant": "#35343d",
+                        "primary-fixed": "#e3dfff",
+                        "on-surface": "#e5e1ed",
+                        "on-primary-fixed-variant": "#3b2abd",
+                        "on-secondary": "#003543",
+                        "secondary-fixed-dim": "#4cd6ff",
+                        "secondary-fixed": "#b7eaff",
+                        "outline-variant": "#474554",
+                        "on-background": "#e5e1ed",
+                        "error-container": "#93000a",
+                        "surface": "#13121b",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed-variant": "#004e60",
+                        "inverse-on-surface": "#302f38",
+                        "secondary": "#a6e6ff",
+                        "secondary-container": "#14d1ff",
+                        "surface-bright": "#393841",
+                        "on-tertiary-container": "#5b0018",
+                        "surface-dim": "#13121b",
+                        "surface-tint": "#c5c0ff",
+                        "background": "#0e0d15",
+                        "primary-fixed-dim": "#c5c0ff",
+                        "on-primary-container": "#1e0090",
+                        "surface-container-highest": "#35343d",
+                        "tertiary": "#ffb2b8",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "tertiary-container": "#ff506e",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#001f28",
+                        "on-primary": "#2300a3",
+                        "on-surface-variant": "#c8c4d7",
+                        "on-primary-fixed": "#130068",
+                        "surface-container-high": "#2a2932",
+                        "surface-container-lowest": "#050508",
+                        "tertiary-fixed": "#ffdadb",
+                        "surface-container-low": "#1b1b23",
+                        "on-tertiary": "#67001d",
+                        "inverse-surface": "#e5e1ed",
+                        "on-tertiary-fixed-variant": "#91002d",
+                        "surface-container": "#1f1f27",
+                        "inverse-primary": "#5448d5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "64px",
+                        "gutter": "24px",
+                        "md": "24px",
+                        "base": "4px",
+                        "margin": "32px",
+                        "sm": "16px",
+                        "xs": "8px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "body-md": ["Geist"],
+                        "label-sm": ["JetBrains Mono"],
+                        "body-lg": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at 50% 0%, #1b1b23 0%, #0e0d15 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            backdrop-filter: blur(12px);
+            background: rgba(31, 31, 39, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(137, 129, 255, 0.3), 0 0 40px rgba(137, 129, 255, 0.1);
+        }
+
+        .camera-overlay {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+        }
+
+        .status-dot-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .4;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-body-md text-on-surface selection:bg-primary/30">
+    <!-- TopAppBar -->
+    <header class="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-outline-variant">
+        <div class="flex justify-between items-center px-margin py-sm w-full max-w-[1440px] mx-auto">
+            <div class="flex items-center gap-lg">
+                <div class="flex items-center gap-xs">
+                    <span class="material-symbols-outlined text-primary"
+                        style="font-variation-settings: 'FILL' 1;">visibility</span>
+                    <span
+                        class="font-headline-md text-headline-md font-extrabold tracking-tight text-on-background">Vision
+                        AI
+                    </span>
+                </div>
+                <nav class="hidden md:flex items-center gap-md">
+                    <a class="font-label-caps text-label-caps pb-2 {% if request.path == '/' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant hover:text-on-surface transition-colors{% endif %}"
+                        href="/">Dashboard</a>
+                    <a class="font-label-caps text-label-caps pb-2 {% if request.path == '/analytics' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant hover:text-on-surface transition-colors{% endif %}"
+                        href="/analytics">Analytics</a>
+                    <a class="font-label-caps text-label-caps pb-2 {% if request.path == '/cameras' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant hover:text-on-surface transition-colors{% endif %}"
+                        href="/cameras">Cameras</a>
+                    <a class="font-label-caps text-label-caps pb-2 {% if request.path == '/settings' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant hover:text-on-surface transition-colors{% endif %}"
+                        href="/settings">Settings</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-md">
+                <div id="topStatusBadge"
+                    class="flex items-center gap-xs px-sm py-1.5 rounded-full bg-surface-variant/30 border border-outline-variant opacity-50">
+                    <span id="topStatusDot" class="w-2 h-2 rounded-full bg-red-500"></span>
+                    <span id="topStatusText" class="font-label-sm text-label-sm text-on-surface">System Offline</span>
+                </div>
+                <div class="flex items-center gap-xs relative">
+                        <!-- Notifications -->
+                    <button id="btnNotifToggle" class="p-2 rounded-lg hover:bg-surface-variant/10 transition-opacity text-on-surface-variant hover:text-on-surface relative">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span id="notifDot" class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full shadow-[0_0_8px_rgba(255,180,171,0.8)]"></span>
+                    </button>
+                    
+                    <div id="notifDropdown" class="hidden absolute top-full right-0 mt-2 w-80 glass-card bg-surface/95 rounded-xl border border-outline-variant/30 flex-col overflow-hidden z-50 shadow-2xl">
+                        <div class="p-sm bg-surface-variant/30 border-b border-outline-variant/30 flex justify-between items-center">
+                            <span class="font-body-lg font-bold text-on-surface">Recent Scans</span>
+                        </div>
+                        <ul id="notifList" class="max-h-[300px] overflow-y-auto m-0 p-0 flex flex-col">
+                            <li class="p-sm text-center text-on-surface-variant text-sm">Loading...</li>
+                        </ul>
+                    </div>
+                    <button
+                        class="p-2 rounded-lg hover:bg-surface-variant/10 transition-opacity text-on-surface-variant hover:text-on-surface">
+                        <span class="material-symbols-outlined" id="btnSettings"
+                            onclick="window.location.href='/settings'" data-icon="settings">settings</span>
+                    </button>
+                    <button
+                        class="p-2 rounded-lg hover:bg-surface-variant/10 transition-opacity text-on-surface-variant hover:text-on-surface">
+                        <span class="material-symbols-outlined" id="btnAccount" onclick="alert('Profile: Admin User')"
+                            data-icon="account_circle">account_circle</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-[1440px] mx-auto px-margin py-lg h-[calc(100vh-80px)]">
+        {% block content %}{% endblock %}
+    </main>
+    <!-- Footer Identity Info -->
+    <footer
+        class="fixed bottom-0 left-0 w-full px-margin py-xs flex justify-between items-center pointer-events-none opacity-40">
+        <span class="font-label-sm text-label-sm text-on-surface-variant">v4.2.0-STABLE</span>
+        <div class="flex items-center gap-xs">
+            <span class="material-symbols-outlined text-[14px]">public</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">Global Access Node: LDN-01</span>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnNotifToggle = document.getElementById('btnNotifToggle');
+            const notifDropdown = document.getElementById('notifDropdown');
+            const notifList = document.getElementById('notifList');
+
+            if (btnNotifToggle && notifDropdown) {
+                const notifDot = document.getElementById('notifDot');
+                btnNotifToggle.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    
+                    const isHidden = notifDropdown.classList.contains('hidden');
+                    if (isHidden) {
+                        if (notifDot) notifDot.classList.add('hidden');
+                        notifDropdown.classList.remove('hidden');
+                        notifDropdown.classList.add('flex');
+                        
+                        // Fetch notifications
+                        try {
+                            notifList.innerHTML = '<li class="p-sm text-center text-on-surface-variant text-sm">Loading...</li>';
+                            const res = await fetch('/attendance');
+                            const data = await res.json();
+                            
+                            notifList.innerHTML = '';
+                            if (data.length === 0) {
+                                notifList.innerHTML = '<li class="p-sm text-center text-on-surface-variant text-sm">No recent activity</li>';
+                                return;
+                            }
+
+                            // Get last 5
+                            const recent = data.slice(-5).reverse();
+                            recent.forEach(r => {
+                                const li = document.createElement('li');
+                                li.className = 'p-sm border-b border-outline-variant/20 hover:bg-surface-variant/10 flex flex-col gap-1 transition-colors';
+                                li.innerHTML = `
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-body-md font-bold text-on-surface">${r.Name}</span>
+                                        <span class="font-label-caps text-xs text-on-surface-variant bg-surface-variant/30 px-2 py-0.5 rounded">${r.Time}</span>
+                                    </div>
+                                    <span class="font-label-sm text-on-surface-variant">Authenticated successfully</span>
+                                `;
+                                notifList.appendChild(li);
+                            });
+                        } catch (err) {
+                            console.error(err);
+                            notifList.innerHTML = '<li class="p-sm text-center text-error text-sm">Failed to load</li>';
+                        }
+                    } else {
+                        notifDropdown.classList.add('hidden');
+                        notifDropdown.classList.remove('flex');
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!notifDropdown.contains(e.target) && !btnNotifToggle.contains(e.target)) {
+                        notifDropdown.classList.add('hidden');
+                        notifDropdown.classList.remove('flex');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+
+</html>
+{% block scripts %}{% endblock %}

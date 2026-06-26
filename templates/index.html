@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="flex flex-col lg:flex-row gap-gutter h-full">
+<!-- Main Content Area: Left (70%) Video Feed -->
+<section class="lg:w-[70%] flex flex-col gap-md h-full">
+<div class="relative flex-1 rounded-xl bg-surface-container-lowest overflow-hidden border border-outline-variant/30 flex flex-col group">
+<!-- Camera Viewport (Black) -->
+<div class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+<!-- Dark background shimmer -->
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-variant to-transparent"></div>
+</div>
+
+<!-- Video Content Replacement (Hidden/Offline State) -->
+<video id="videoElement" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover z-10 hidden"></video>
+<canvas id="overlayCanvas" class="absolute inset-0 w-full h-full z-20 pointer-events-none"></canvas>
+<canvas id="captureCanvas" style="display: none;"></canvas>
+
+<div id="offlineIcon" class="flex flex-col items-center gap-md opacity-40 group-hover:opacity-60 transition-opacity z-30 pointer-events-none">
+<span class="material-symbols-outlined text-[64px]" style="font-variation-settings: 'wght' 200;">videocam_off</span>
+</div>
+
+<!-- Top Left Overlay -->
+<div id="cameraStatusBadge" class="absolute z-30 top-sm left-sm camera-overlay flex items-center gap-xs px-sm py-1.5 rounded-full border border-white/10">
+<span id="cameraStatusDot" class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+<span id="cameraStatusText" class="font-label-sm text-label-sm text-white tracking-widest uppercase">Camera Offline</span>
+</div>
+<!-- Center Initialize Action -->
+<div class="absolute inset-0 flex items-center justify-center">
+<button id="startBtn" class="group/btn z-30 flex items-center gap-sm bg-gradient-to-r from-[#6e62ff] to-[#8981ff] hover:from-[#8981ff] hover:to-[#a6e6ff] text-on-primary-fixed font-bold py-3 px-xl rounded-lg neon-glow transition-all active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">videocam</span>
+<span class="font-body-lg text-body-lg">Initialize System</span>
+</button>
+</div>
+</div>
+<!-- Feed Controls / Info Footer -->
+<div class="p-sm bg-surface-container-low border-t border-outline-variant/30 flex justify-between items-center">
+<div class="flex items-center gap-md">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-tighter">Current Camera</span>
+<span class="font-body-md text-body-md font-semibold">Front Entrance - Cam 01</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Sidebar: Right (30%) Secure Log -->
+<aside class="lg:w-[30%] flex flex-col gap-md h-full">
+<div class="glass-card flex-1 rounded-xl flex flex-col overflow-hidden">
+<!-- Header -->
+<div class="p-sm flex justify-between items-center border-b border-outline-variant/30 bg-surface-variant/10">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20">
+<span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface leading-tight">Secure Log</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Real-time Activity Tracking</p>
+</div>
+</div>
+<button id="refreshBtn" class="p-2 rounded-lg hover:bg-surface-variant/30 text-on-surface-variant hover:text-secondary transition-all">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+</div>
+<!-- Log Content Container -->
+<ul id="attendanceList" class="flex-1 flex flex-col p-0 m-0 overflow-y-auto relative">
+<div id="emptyState" class="flex-1 flex flex-col items-center justify-center p-lg relative">
+<!-- Empty State Decoration -->
+<div class="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none">
+<span class="material-symbols-outlined text-[200px]">security</span>
+</div>
+<div class="relative flex flex-col items-center text-center max-w-[240px]">
+<div class="w-16 h-16 rounded-2xl bg-surface-variant/20 flex items-center justify-center mb-md border border-outline-variant/20">
+<span class="material-symbols-outlined text-[32px] text-on-surface-variant" style="font-variation-settings: 'wght' 200;">inventory_2</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-xs">Log is empty for today.</p>
+<p class="font-label-sm text-label-sm text-outline">Waiting for system initialization to begin tracking activity.</p>
+</div>
+</div>
+</ul>
+<!-- Sidebar Footer -->
+<div class="p-sm border-t border-outline-variant/30 flex flex-col gap-sm bg-surface-container-lowest">
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Encryption Status</span>
+<span class="font-label-caps text-label-caps text-primary">AES-256</span>
+</div>
+<div class="flex gap-sm mt-xs">
+<button onclick="alert('Vision AI Help: Ensure your face is clearly visible to the camera.')" class="flex-1 font-label-caps text-label-caps py-2 px-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors flex items-center justify-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[18px]">help</span>
+    Help
+</button>
+<button onclick="window.location.reload()" class="flex-1 font-label-caps text-label-caps py-2 px-3 rounded-lg border border-outline-variant hover:bg-error/10 hover:text-error hover:border-error transition-colors flex items-center justify-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+    Logout
+</button>
+</div>
+</div>
+</div>
+<!-- System Health Card -->
+<div class="glass-card p-sm rounded-xl flex items-center justify-between border-l-4 border-l-primary">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">hub</span>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Network</span>
+<span class="font-body-md text-body-md font-bold">Secure Tunnel Active</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Latency</span>
+<div class="font-label-caps text-label-caps text-secondary">24ms</div>
+</div>
+</div>
+</aside>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    // General Buttons
+    document.querySelectorAll('[data-icon]').forEach(btn => {
+        btn.parentElement.addEventListener('click', () => {
+            alert(btn.getAttribute('data-icon') + " clicked!");
+        });
+    });
+
+    const video = document.getElementById('videoElement');
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const captureCanvas = document.getElementById('captureCanvas');
+    const startBtn = document.getElementById('startBtn');
+    
+    const cameraStatusBadge = document.getElementById('cameraStatusBadge');
+    const cameraStatusDot = document.getElementById('cameraStatusDot');
+    const cameraStatusText = document.getElementById('cameraStatusText');
+
+    const topStatusBadge = document.getElementById('topStatusBadge');
+    const topStatusDot = document.getElementById('topStatusDot');
+    const topStatusText = document.getElementById('topStatusText');
+
+    const attendanceList = document.getElementById('attendanceList');
+    const emptyState = document.getElementById('emptyState');
+    const refreshBtn = document.getElementById('refreshBtn');
+    
+    const overlayCtx = overlayCanvas.getContext('2d');
+    const captureCtx = captureCanvas.getContext('2d');
+
+    let stream = null;
+    let detectionInterval = null;
+    let isProcessing = false;
+    let systemActive = false;
+
+    // TTS System
+    function speak(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    async function toggleCamera() {
+        if (systemActive) {
+            stopCamera();
+        } else {
+            startCamera();
+        }
+    }
+
+    startBtn.addEventListener('click', toggleCamera);
+    // Add micro interaction
+    startBtn.addEventListener('mousedown', () => { startBtn.style.transform = 'scale(0.95)'; });
+    startBtn.addEventListener('mouseup', () => { startBtn.style.transform = 'scale(1)'; });
+
+    async function startCamera() {
+        try {
+            startBtn.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sync</span><span class="font-body-lg text-body-lg">Starting...</span>`;
+            
+            const preferredCameraId = localStorage.getItem('selectedCameraId');
+            const videoConstraints = { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" };
+            if (preferredCameraId) {
+                videoConstraints.deviceId = { exact: preferredCameraId };
+                delete videoConstraints.facingMode;
+            }
+
+            stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
+            video.srcObject = stream;
+            
+            video.onloadedmetadata = () => {
+                overlayCanvas.width = video.videoWidth;
+                overlayCanvas.height = video.videoHeight;
+                captureCanvas.width = video.videoWidth;
+                captureCanvas.height = video.videoHeight;
+                
+                video.classList.remove('hidden');
+                document.getElementById('offlineIcon').classList.add('hidden');
+                
+                // Change button to Terminate
+                startBtn.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stop_circle</span><span class="font-body-lg text-body-lg">Terminate System</span>`;
+                startBtn.classList.remove('from-[#6e62ff]', 'to-[#8981ff]', 'hover:from-[#8981ff]', 'hover:to-[#a6e6ff]');
+                startBtn.classList.add('from-red-600', 'to-red-500', 'hover:from-red-500', 'hover:to-red-400');
+                // Move button to footer controls instead of center
+                startBtn.parentElement.classList.remove('inset-0', 'justify-center');
+                startBtn.parentElement.classList.add('bottom-sm', 'right-sm', 'justify-end');
+                
+                // Update camera status
+                cameraStatusDot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]";
+                cameraStatusText.innerText = "Camera Active";
+
+                // Update top status
+                topStatusBadge.classList.remove('opacity-50');
+                topStatusDot.className = "w-2 h-2 rounded-full bg-green-500 status-dot-pulse";
+                topStatusText.innerText = "System Active";
+
+                systemActive = true;
+                detectionInterval = setInterval(processFrame, 333); 
+            };
+        } catch (err) {
+            console.error("Camera error:", err);
+            alert("Please grant camera access to initialize the biometric system.");
+            startBtn.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">videocam</span><span class="font-body-lg text-body-lg">Initialize System</span>`;
+        }
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+        }
+        if (detectionInterval) clearInterval(detectionInterval);
+        
+        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        
+        video.classList.add('hidden');
+        document.getElementById('offlineIcon').classList.remove('hidden');
+        
+        startBtn.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">videocam</span><span class="font-body-lg text-body-lg">Initialize System</span>`;
+        startBtn.classList.remove('from-red-600', 'to-red-500', 'hover:from-red-500', 'hover:to-red-400');
+        startBtn.classList.add('from-[#6e62ff]', 'to-[#8981ff]', 'hover:from-[#8981ff]', 'hover:to-[#a6e6ff]');
+        
+        startBtn.parentElement.classList.add('inset-0', 'justify-center');
+        startBtn.parentElement.classList.remove('bottom-sm', 'right-sm', 'justify-end');
+        
+        cameraStatusDot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]";
+        cameraStatusText.innerText = "Camera Offline";
+
+        topStatusBadge.classList.add('opacity-50');
+        topStatusDot.className = "w-2 h-2 rounded-full bg-red-500";
+        topStatusText.innerText = "System Offline";
+
+        systemActive = false;
+    }
+
+    async function processFrame() {
+        if (!stream || isProcessing) return;
+        isProcessing = true;
+        
+        captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+        const base64Image = captureCanvas.toDataURL('image/jpeg', 0.6);
+
+        try {
+            const response = await fetch('/recognize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image })
+            });
+
+            const data = await response.json();
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            if (data.status === 'success' && data.results.length > 0) {
+                data.results.forEach(res => {
+                    const { x, y, w, h } = res.box;
+                    const name = res.name;
+                    
+                    let brandColor = '#EF4444';
+                    let labelBg = 'rgba(239, 68, 68, 0.9)';
+                    
+                    if (res.action === 'MARKED') {
+                        brandColor = '#10B981';
+                        labelBg = 'rgba(16, 185, 129, 0.9)';
+                        speak(res.message);
+                        fetchAttendance(); 
+                    } else if (res.action === 'PRESENT') {
+                        brandColor = '#F59E0B';
+                        labelBg = 'rgba(245, 158, 11, 0.9)';
+                    } else if (name !== 'Unknown') {
+                        brandColor = '#8981ff';
+                        labelBg = 'rgba(137, 129, 255, 0.9)';
+                    }
+
+                    const cornerLength = 20;
+                    overlayCtx.strokeStyle = brandColor;
+                    overlayCtx.lineWidth = 4;
+                    overlayCtx.shadowBlur = 10;
+                    overlayCtx.shadowColor = brandColor;
+
+                    overlayCtx.beginPath();
+                    overlayCtx.moveTo(x, y + cornerLength); overlayCtx.lineTo(x, y); overlayCtx.lineTo(x + cornerLength, y);
+                    overlayCtx.moveTo(x + w - cornerLength, y); overlayCtx.lineTo(x + w, y); overlayCtx.lineTo(x + w, y + cornerLength);
+                    overlayCtx.moveTo(x + w, y + h - cornerLength); overlayCtx.lineTo(x + w, y + h); overlayCtx.lineTo(x + w - cornerLength, y + h);
+                    overlayCtx.moveTo(x + cornerLength, y + h); overlayCtx.lineTo(x, y + h); overlayCtx.lineTo(x, y + h - cornerLength);
+                    overlayCtx.stroke();
+                    
+                    overlayCtx.shadowBlur = 0;
+
+                    overlayCtx.fillStyle = labelBg;
+                    overlayCtx.beginPath();
+                    overlayCtx.roundRect(x, y - 35, w, 30, [8, 8, 8, 8]);
+                    overlayCtx.fill();
+                    
+                    overlayCtx.fillStyle = '#FFFFFF';
+                    overlayCtx.font = '600 16px Geist, sans-serif';
+                    overlayCtx.textAlign = 'center';
+                    overlayCtx.fillText(name, x + w/2, y - 15);
+
+                    overlayCtx.fillStyle = brandColor;
+                    overlayCtx.font = '500 14px JetBrains Mono, monospace';
+                    overlayCtx.fillText(`MATCH: ${res.score} PTS`, x + w/2, y + h + 25);
+                });
+            }
+        } catch (err) {
+            console.error("Vision Inference Error:", err);
+        } finally {
+            isProcessing = false;
+        }
+    }
+
+    async function fetchAttendance() {
+        try {
+            refreshBtn.style.opacity = '0.5';
+            const res = await fetch('/attendance');
+            const data = await res.json();
+            
+            // clear existing list items except empty state
+            Array.from(attendanceList.children).forEach(child => {
+                if(child.id !== 'emptyState') attendanceList.removeChild(child);
+            });
+            
+            if (data.length === 0) {
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const todayData = data.filter(r => r.Date === today);
+            
+            if (todayData.length === 0) {
+                emptyState.style.display = 'flex';
+            } else {
+                emptyState.style.display = 'none';
+                todayData.reverse().forEach(record => {
+                    const initial = record.Name.charAt(0).toUpperCase();
+                    const li = document.createElement('li');
+                    li.className = 'w-full p-sm flex justify-between items-center border-b border-outline-variant/30 hover:bg-surface-variant/10 transition-colors';
+                    li.innerHTML = `
+                        <div class="flex items-center gap-sm">
+                            <div class="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                                <span class="font-headline-sm text-primary font-bold">${initial}</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-body-md text-on-surface font-semibold">${record.Name}</span>
+                                <span class="font-label-sm text-on-surface-variant">Authenticated</span>
+                            </div>
+                        </div>
+                        <div class="font-label-caps text-on-surface-variant bg-surface-variant/20 px-2 py-1 rounded">
+                            ${record.Time}
+                        </div>
+                    `;
+                    attendanceList.appendChild(li);
+                });
+            }
+        } catch (err) {
+            console.error("Failed to fetch log", err);
+        } finally {
+            refreshBtn.style.opacity = '1';
+        }
+    }
+
+    refreshBtn.addEventListener('click', fetchAttendance);
+    fetchAttendance();
+</script>
+{% endblock %}

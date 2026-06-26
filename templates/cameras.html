@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col gap-lg h-full">
+    <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-primary text-[32px]">videocam</span>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">Camera Management</h1>
+    </div>
+
+    <div class="glass-card p-lg rounded-xl flex flex-col gap-md">
+        <div class="flex justify-between items-center border-b border-outline-variant/30 pb-sm">
+            <div>
+                <h2 class="font-headline-md text-on-surface">Input Devices</h2>
+                <p class="font-label-sm text-on-surface-variant">Select the default camera for the AI vision system.</p>
+            </div>
+            <button id="scanBtn" class="bg-surface-variant/30 hover:bg-surface-variant/50 border border-outline-variant px-sm py-2 rounded-lg font-label-caps flex items-center gap-xs transition-colors">
+                <span class="material-symbols-outlined text-[18px]">search</span> Scan Devices
+            </button>
+        </div>
+
+        <div id="deviceList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-sm mt-sm">
+            <div class="col-span-full text-center text-on-surface-variant py-xl">
+                Click "Scan Devices" to detect connected cameras. (Requires permission)
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const scanBtn = document.getElementById('scanBtn');
+    const deviceList = document.getElementById('deviceList');
+
+    async function scanDevices() {
+        try {
+            // Request permission first, otherwise labels are empty
+            await navigator.mediaDevices.getUserMedia({ video: true });
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+            
+            deviceList.innerHTML = '';
+            
+            if (videoDevices.length === 0) {
+                deviceList.innerHTML = '<div class="col-span-full text-center text-error">No cameras found.</div>';
+                return;
+            }
+
+            const currentDeviceId = localStorage.getItem('selectedCameraId');
+
+            videoDevices.forEach((device, index) => {
+                const isSelected = currentDeviceId === device.deviceId || (index === 0 && !currentDeviceId);
+                const name = device.label || `Camera ${index + 1}`;
+                
+                const card = document.createElement('div');
+                card.className = `p-sm rounded-lg border cursor-pointer transition-all ${isSelected ? 'border-primary bg-primary/10' : 'border-outline-variant/50 bg-surface-variant/10 hover:border-outline-variant'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-xs">
+                        <span class="material-symbols-outlined ${isSelected ? 'text-primary' : 'text-on-surface-variant'}">linked_camera</span>
+                        ${isSelected ? '<span class="w-2 h-2 rounded-full bg-green-500 status-dot-pulse"></span>' : ''}
+                    </div>
+                    <div class="font-body-md font-semibold text-on-surface truncate" title="${name}">${name}</div>
+                    <div class="font-label-caps text-on-surface-variant mt-xs">${isSelected ? 'ACTIVE' : 'STANDBY'}</div>
+                `;
+
+                card.addEventListener('click', () => {
+                    localStorage.setItem('selectedCameraId', device.deviceId);
+                    scanDevices(); // re-render
+                });
+
+                deviceList.appendChild(card);
+            });
+            
+        } catch (e) {
+            console.error("Error scanning devices:", e);
+            alert("Could not access cameras. Please grant permissions.");
+        }
+    }
+
+    scanBtn.addEventListener('click', scanDevices);
+    
+    // Auto-scan on load if previously granted
+    navigator.permissions.query({name: 'camera'}).then(res => {
+        if(res.state === 'granted') {
+            scanDevices();
+        }
+    });
+</script>
+{% endblock %}

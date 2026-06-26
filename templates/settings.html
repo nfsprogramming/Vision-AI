@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col gap-lg h-full">
+    <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-primary text-[32px]">settings</span>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">System Settings</h1>
+    </div>
+
+    <div class="glass-card p-lg rounded-xl flex flex-col gap-lg max-w-2xl">
+        <!-- Section: AI Engine -->
+        <div class="flex flex-col gap-sm">
+            <h2 class="font-headline-sm text-on-surface border-b border-outline-variant/30 pb-2">AI Engine Parameters</h2>
+            
+            <div class="flex flex-col gap-xs mt-2">
+                <label class="font-body-md font-semibold text-on-surface">Match Threshold (Confidence Score)</label>
+                <p class="font-label-sm text-on-surface-variant mb-2">Higher values require stricter facial feature matching to mark attendance.</p>
+                
+                <div class="flex items-center gap-sm">
+                    <input type="range" id="thresholdRange" min="2" max="20" step="1" class="w-full accent-primary" />
+                    <span id="thresholdValue" class="font-label-caps text-label-caps bg-surface-variant/30 px-3 py-1 rounded border border-outline-variant w-12 text-center">8</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Actions -->
+        <div class="flex justify-end pt-sm border-t border-outline-variant/30">
+            <button id="saveBtn" class="bg-primary hover:bg-primary/90 text-on-primary font-bold py-2 px-md rounded-lg transition-colors flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[18px]">save</span> Save Configuration
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const range = document.getElementById('thresholdRange');
+    const valueDisp = document.getElementById('thresholdValue');
+    const saveBtn = document.getElementById('saveBtn');
+
+    range.addEventListener('input', (e) => {
+        valueDisp.innerText = e.target.value;
+    });
+
+    async function loadSettings() {
+        try {
+            const res = await fetch('/api/settings');
+            const data = await res.json();
+            if (data.MATCH_THRESHOLD) {
+                range.value = data.MATCH_THRESHOLD;
+                valueDisp.innerText = data.MATCH_THRESHOLD;
+            }
+        } catch (e) {
+            console.error("Failed to load settings:", e);
+        }
+    }
+
+    saveBtn.addEventListener('click', async () => {
+        const val = parseInt(range.value);
+        saveBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">sync</span> Saving...`;
+        saveBtn.style.opacity = '0.7';
+
+        try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ MATCH_THRESHOLD: val })
+            });
+            setTimeout(() => {
+                saveBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check</span> Saved`;
+                saveBtn.style.opacity = '1';
+                setTimeout(() => {
+                    saveBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span> Save Configuration`;
+                }, 2000);
+            }, 500);
+        } catch (e) {
+            console.error("Failed to save settings:", e);
+            alert("Error saving settings");
+            saveBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span> Save Configuration`;
+            saveBtn.style.opacity = '1';
+        }
+    });
+
+    loadSettings();
+</script>
+{% endblock %}
